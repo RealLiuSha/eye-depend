@@ -58,7 +58,7 @@ func (writer Writer) GetMetrics(stats Stats) Metrics {
 	metrics.Mem.MaxUsage              = stats.Stats.MemoryStats.MaxUsage
 	metrics.Mem.Usage                 = stats.Stats.MemoryStats.Usage
 
-	metrics.Mem.Usage                 = stats.Stats.MemoryStats.Stats.TotalActiveAnon
+	metrics.Mem.TotalActiveAnon       = stats.Stats.MemoryStats.Stats.TotalActiveAnon
 	metrics.Mem.TotalActiveFile       = stats.Stats.MemoryStats.Stats.TotalActiveFile
 	metrics.Mem.TotalCache            = stats.Stats.MemoryStats.Stats.TotalCache
 	metrics.Mem.TotalInactiveAnon     = stats.Stats.MemoryStats.Stats.TotalInactiveAnon
