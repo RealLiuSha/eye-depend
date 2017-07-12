@@ -11,9 +11,9 @@ type Writer struct {
 
 type Metrics struct {
 	CPU	struct {
-		UsageInUsermode			uint64
-		UsageInKernelmode		uint64
+		SystemCPUUsage		    uint64
 		TotalUsage				uint64
+		PercpuUsage			    []uint64
 	}
 
 	Mem struct {
@@ -51,9 +51,9 @@ func NewWriter(writer io.Writer) Writer {
 func (writer Writer) GetMetrics(stats Stats) Metrics {
 	var metrics Metrics
 
-	metrics.CPU.UsageInUsermode       = stats.Stats.CPUStats.CPUUsage.UsageInUsermode
-	metrics.CPU.UsageInKernelmode     = stats.Stats.CPUStats.CPUUsage.UsageInKernelmode
+	metrics.CPU.SystemCPUUsage        = stats.Stats.CPUStats.SystemCPUUsage
 	metrics.CPU.TotalUsage            = stats.Stats.CPUStats.CPUUsage.TotalUsage
+	metrics.CPU.PercpuUsage			  = stats.Stats.CPUStats.CPUUsage.PercpuUsage
 	metrics.Mem.Limit                 = stats.Stats.MemoryStats.Limit
 	metrics.Mem.MaxUsage              = stats.Stats.MemoryStats.MaxUsage
 	metrics.Mem.Usage                 = stats.Stats.MemoryStats.Usage

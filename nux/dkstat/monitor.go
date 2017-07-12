@@ -4,7 +4,6 @@ import (
 	"github.com/fsouza/go-dockerclient"
 	"github.com/itchenyi/eye-depend/gpool"
 	"fmt"
-	"os/exec"
 )
 
 // MonitorDockerClient represents restricted interface for docker client
@@ -30,17 +29,17 @@ func NewMonitor(client MonitorClient, id string) (*Monitor, error) {
 
 	getContainerIP := func () string {
 		for key := range container.NetworkSettings.Networks {
-			if obj, exists := container.NetworkSettings.Networks[key]; exists {
-				return obj.IPAddress
+			fmt.Println(key)
+			if obj, isExist := container.NetworkSettings.Networks[key]; isExist {
+				if obj.IPAddress != "" {
+					return obj.IPAddress
+				}
+
+				continue
 			}
 		}
 
-		cmd := exec.Command(
-			fmt.Sprintf("docker exec %s ifconfig ", container.ID) +
-				"eth0|grep -oP '\\d.+(?=  (Bcast:|netmask))'")
-
-		out, _ := cmd.CombinedOutput()
-		return string(out)
+		return ""
 	}
 
 	return &Monitor{
@@ -52,14 +51,14 @@ func NewMonitor(client MonitorClient, id string) (*Monitor, error) {
 	}, nil
 }
 
-func (monitor *Monitor) handle(pool *gpool.Pool, ch chan<- Stats) error {
-	statsChan := make(chan *docker.Stats)
+func (monitor *Monitor) handle(pool *gpool.Pool, statsChan chan<- Stats) error {
+	dockerStatsChan := make(chan *docker.Stats)
 
 	go func() {
 		pool.JobDone()
-		stats := <-statsChan
+		stats := <-dockerStatsChan
 
-		ch <- Stats{
+		statsChan <- Stats{
 			ID:    monitor.id,
 			IP:	   monitor.ip,
 			App:   monitor.app,
@@ -70,7 +69,7 @@ func (monitor *Monitor) handle(pool *gpool.Pool, ch chan<- Stats) error {
 
 	return monitor.client.Stats(docker.StatsOptions{
 		ID:     monitor.id,
-		Stats:  statsChan,
+		Stats:  dockerStatsChan,
 		Stream: false,
 	})
 }
